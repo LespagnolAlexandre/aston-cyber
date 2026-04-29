@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#3a0a5c">
+<title>Aston Cybersécurité — Démonstration pédagogique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --aston: #6b2c91;
+    --aston-deep: #3a0a5c;
+    --aston-light: #b89dd1;
+    --bg: #0e0418;
+    --bg-card: #1a0a2e;
+    --ink: #f8f4ff;
+    --ink-soft: #b8a8d4;
+    --danger: #ff3b3b;
+    --danger-deep: #c81d1d;
+    --success: #3cd07a;
+    --warn: #ffb547;
+    --info: #5fb8ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(107, 44, 145, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 100%, rgba(58, 10, 92, 0.6) 0%, transparent 50%);
+  }
+  .container { max-width: 600px; margin: 0 auto; padding: 24px 20px 60px; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ============ STAGE 1 : ALERT ============ */
+  .alert {
+    text-align: center;
+    padding-top: 8px;
+    animation: pulse-alert 2s ease-in-out infinite;
+  }
+  @keyframes pulse-alert {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.15); }
+  }
+  .skull { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+  .alert h1 {
+    font-size: 24px; font-weight: 800;
+    color: var(--danger);
+    text-shadow: 0 0 20px rgba(255, 59, 59, 0.5);
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+  .alert__sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--danger); opacity: 0.8;
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  .scan-box {
+    margin-top: 24px;
+    background: rgba(255, 59, 59, 0.06);
+    border: 1.5px solid rgba(255, 59, 59, 0.4);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .scan-line {
+    display: flex; gap: 10px; padding: 7px 0;
+    border-bottom: 1px dashed rgba(255, 59, 59, 0.15);
+    align-items: flex-start;
+  }
+  .scan-line:last-child { border-bottom: none; }
+  .scan-line__icon { flex-shrink: 0; width: 22px; }
+  .scan-line__label { color: var(--ink-soft); flex-shrink: 0; min-width: 76px; font-size: 11px; }
+  .scan-line__value {
+    color: var(--ink); font-weight: 700;
+    word-break: break-word; flex: 1;
+    min-height: 18px;
+  }
+  .scan-line__value.loading { color: var(--warn); }
+  .scan-line__value.loading::after {
+    content: '...'; animation: dots 1.4s steps(4) infinite; color: var(--warn);
+  }
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+  }
+  .fingerprint {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(255, 59, 59, 0.3);
+    text-align: center;
+  }
+  .fingerprint__label { font-size: 10px; color: var(--danger); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
+  .fingerprint__hash {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 18px;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+  }
+  .fingerprint__note { font-size: 10px; color: var(--ink-soft); margin-top: 4px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px 18px;
+    border: none; border-radius: 12px;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn--primary {
+    background: var(--aston);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(107, 44, 145, 0.4);
+  }
+  .btn--ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid rgba(184, 168, 212, 0.3);
+  }
+  .btn--danger {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(255, 59, 59, 0.5);
+  }
+
+  /* ============ STAGE 2 : REVEAL ============ */
+  .reveal { display: none; animation: fade-in 0.5s ease-out; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal__check {
+    width: 72px; height: 72px;
+    margin: 8px auto 16px;
+    border-radius: 50%;
+    background: var(--success);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 0 40px rgba(60, 208, 122, 0.5);
+  }
+  .reveal h2 {
+    text-align: center; font-size: 24px; font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .reveal__lead {
+    text-align: center; color: var(--ink-soft);
+    font-size: 14px; line-height: 1.5;
+    margin-bottom: 22px;
+  }
+  .risks {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid rgba(184, 168, 212, 0.15);
+  }
+  .risks__title {
+    font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--aston-light); margin-bottom: 14px; font-weight: 700;
+  }
+  .risk { display: flex; gap: 10px; padding: 9px 0; font-size: 13.5px; line-height: 1.4; }
+  .risk__dot { color: var(--danger); flex-shrink: 0; font-size: 10px; padding-top: 4px; }
+  .risk strong { color: var(--ink); }
+
+  .school-box {
+    margin-top: 24px;
+    background: linear-gradient(135deg, var(--aston) 0%, var(--aston-deep) 100%);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+  .school-box__logo {
+    background: #fff; color: var(--aston);
+    display: inline-block; padding: 6px 14px;
+    border-radius: 4px; font-weight: 800; letter-spacing: 0.05em;
+    font-size: 14px; margin-bottom: 10px;
+  }
+  .school-box h3 { font-size: 17px; margin-bottom: 4px; }
+  .school-box p { font-size: 13px; color: var(--ink-soft); }
+
+  /* ============ STAGE 3 : THE TRAP ============ */
+  .trap-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px dashed rgba(184, 168, 212, 0.2);
+  }
+  .trap-section__hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--aston-light); text-align: center; margin-bottom: 14px;
+  }
+  .trap-cta {
+    background: var(--bg-card);
+    border: 1px solid var(--aston);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+  .trap-cta h3 { font-size: 18px; margin-bottom: 6px; }
+  .trap-cta p { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.5; }
+  .trap-cta__btn {
+    background: linear-gradient(135deg, var(--aston) 0%, #8a3eb5 100%);
+    color: #fff;
+    border: none; border-radius: 10px;
+    padding: 14px 22px;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 6px 20px rgba(107, 44, 145, 0.4);
+  }
+
+  /* ============ STAGE 4 : MIRROR TRAP ============ */
+  .mirror {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: #000;
+    flex-direction: column;
+  }
+  .mirror.active { display: flex; }
+  .mirror__video {
+    flex: 1; width: 100%; object-fit: cover;
+    transform: scaleX(-1);
+    background: #000;
+  }
+  .mirror__rec {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--danger); color: #fff;
+    padding: 6px 12px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+    z-index: 2;
+  }
+  .mirror__rec__dot {
+    width: 8px; height: 8px; background: #fff; border-radius: 50%;
+    animation: rec-blink 1s ease-in-out infinite;
+  }
+  @keyframes rec-blink { 50% { opacity: 0.2; } }
+  .mirror__overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 30%, #000 100%);
+    padding: 60px 20px 30px;
+    z-index: 2;
+  }
+  .mirror__overlay h2 {
+    font-size: 22px; font-weight: 800; line-height: 1.2;
+    margin-bottom: 12px; color: var(--danger);
+  }
+  .mirror__overlay p {
+    font-size: 13.5px; line-height: 1.5; color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .mirror__overlay p strong { color: var(--warn); }
+  .mirror__transparency {
+    background: rgba(60, 208, 122, 0.1);
+    border: 1px solid rgba(60, 208, 122, 0.4);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--success);
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.5;
+  }
+
+  /* ============ STAGE 5 : FINAL ============ */
+  .final { display: none; animation: fade-in 0.5s ease-out; }
+  .final__icon {
+    font-size: 56px; text-align: center; margin-bottom: 12px;
+  }
+  .final h2 {
+    text-align: center; font-size: 24px; font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .final__lead {
+    text-align: center; color: var(--ink-soft);
+    font-size: 14px; line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  /* ============ FORENSIC TIMELINE ============ */
+  .forensic {
+    background: #000;
+    border: 1px solid rgba(95, 184, 255, 0.3);
+    border-radius: 14px;
+    padding: 18px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+  .forensic__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(95, 184, 255, 0.2);
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--info);
+  }
+  .forensic__header__dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    display: inline-block; margin-right: 6px;
+    animation: rec-blink 1.6s ease-in-out infinite;
+  }
+  .forensic__entry {
+    display: grid;
+    grid-template-columns: 64px 24px 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(95, 184, 255, 0.08);
+    opacity: 0;
+    animation: typeIn 0.3s ease-out forwards;
+  }
+  .forensic__entry:last-child { border-bottom: none; }
+  .forensic__t { color: var(--info); font-weight: 500; }
+  .forensic__icon { text-align: center; }
+  .forensic__txt { color: var(--ink); }
+  .forensic__txt em {
+    font-style: normal; color: var(--warn);
+    display: block; margin-top: 2px; padding-left: 6px;
+    border-left: 2px solid var(--warn);
+    font-size: 10.5px; opacity: 0.85;
+  }
+  .forensic__txt strong { color: var(--info); }
+  .forensic__txt .danger { color: var(--danger); font-weight: 700; }
+  .forensic__txt .success { color: var(--success); font-weight: 700; }
+
+  @keyframes typeIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .moral {
+    margin-top: 24px;
+    background: linear-gradient(135deg, var(--aston-deep) 0%, var(--aston) 100%);
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+  }
+  .moral h3 {
+    font-size: 19px; margin-bottom: 10px; line-height: 1.3;
+  }
+  .moral h3 em { color: var(--aston-light); font-style: normal; }
+  .moral p {
+    font-size: 13.5px; line-height: 1.55; color: rgba(255,255,255,0.85);
+  }
+  .moral p strong { color: var(--warn); }
+  .moral .signature {
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    color: var(--aston-light);
+  }
+
+  /* trap final variant */
+  .trap-cta--final {
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(107,44,145,0.15) 100%);
+    border: 1px dashed var(--aston-light);
+  }
+
+  /* ============ STAGE BOSS : LE GORILLE ============ */
+  .boss {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    text-align: center;
+    overflow-y: auto;
+  }
+  .boss.active { display: flex; animation: fade-in 0.4s ease-out; }
+  .boss__img {
+    max-width: min(80%, 300px);
+    max-height: 50vh;
+    border-radius: 12px;
+    box-shadow: 0 0 80px rgba(255, 59, 59, 0.35);
+    margin-bottom: 28px;
+    border: 2px solid rgba(255, 59, 59, 0.4);
+  }
+  .boss__title {
+    font-size: 32px; font-weight: 800;
+    color: var(--danger);
+    line-height: 1.1;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .boss__sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--warn);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .boss__txt {
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 460px;
+    margin: 0 auto 28px;
+  }
+  .boss__txt strong { color: var(--warn); }
+  .boss__btn {
+    background: var(--aston);
+    color: #fff; border: none;
+    padding: 14px 28px; border-radius: 10px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700; font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(107, 44, 145, 0.4);
+  }
+  .boss__btn:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============ STAGE 1 : ALERT ============ -->
+  <section class="alert" id="stage-alert">
+    <div class="skull">☠️</div>
+    <h1>⚠️ ALERTE DE SÉCURITÉ ⚠️</h1>
+    <div class="alert__sub">Site inconnu · Empreinte en cours</div>
+
+    <div class="scan-box">
+      <div class="scan-line"><span class="scan-line__icon">📱</span><span class="scan-line__label">Appareil</span><span class="scan-line__value loading" id="m-device"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">🌐</span><span class="scan-line__label">Navigateur</span><span class="scan-line__value loading" id="m-browser"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">🌍</span><span class="scan-line__label">IP / Géo</span><span class="scan-line__value loading" id="m-geo"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">📡</span><span class="scan-line__label">Réseau</span><span class="scan-line__value loading" id="m-network"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">⚙️</span><span class="scan-line__label">Hardware</span><span class="scan-line__value loading" id="m-hardware"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">🔋</span><span class="scan-line__label">Batterie</span><span class="scan-line__value loading" id="m-battery"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">📐</span><span class="scan-line__label">Écran</span><span class="scan-line__value loading" id="m-screen"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">🗣️</span><span class="scan-line__label">Langue</span><span class="scan-line__value loading" id="m-lang"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">🕒</span><span class="scan-line__label">Fuseau</span><span class="scan-line__value loading" id="m-tz"></span></div>
+      <div class="scan-line"><span class="scan-line__icon">↩️</span><span class="scan-line__label">Source</span><span class="scan-line__value loading" id="m-source"></span></div>
+
+      <div class="fingerprint" id="fp-box" style="display:none">
+        <div class="fingerprint__label">▸ Empreinte unique générée</div>
+        <div class="fingerprint__hash mono" id="m-fp">—</div>
+        <div class="fingerprint__note">Tu es probablement le seul à avoir cette signature parmi les visiteurs de cette page.</div>
+      </div>
+    </div>
+
+    <button class="btn btn--primary" id="btn-reveal">J'ai compris, afficher la suite</button>
+  </section>
+
+  <!-- ============ STAGE 2 : REVEAL ============ -->
+  <section class="reveal" id="stage-reveal">
+    <div class="reveal__check">✓</div>
+    <h2>Pas de panique !</h2>
+    <p class="reveal__lead">
+      Aucune donnée n'a été stockée. Aucun virus installé.<br>
+      Toutes les infos ci-dessus, ton navigateur les envoie à <strong>chaque site</strong> que tu visites.
+    </p>
+
+    <div class="risks">
+      <div class="risks__title">⚠️ Mais un QR malveillant aurait pu :</div>
+      <div class="risk"><span class="risk__dot">●</span><div><strong>Voler tes cookies de session</strong> et se connecter à ta place sur tes comptes</div></div>
+      <div class="risk"><span class="risk__dot">●</span><div><strong>Te rediriger vers un faux site</strong> qui imite ton ENT pour piéger ton mot de passe</div></div>
+      <div class="risk"><span class="risk__dot">●</span><div><strong>Télécharger un fichier piégé</strong> en exploitant une faille de ton navigateur</div></div>
+      <div class="risk"><span class="risk__dot">●</span><div><strong>Récupérer ta position GPS exacte</strong> si tu acceptes la demande</div></div>
+    </div>
+
+    <div class="school-box">
+      <div class="school-box__logo">ASTON ÉCOLE IT</div>
+      <h3>Bienvenue dans la formation Cybersécurité</h3>
+      <p>Première leçon : ne jamais scanner un QR sans vérifier la source.</p>
+    </div>
+
+    <div class="trap-section">
+      <div class="trap-section__hint">// Encore une étape avant le programme</div>
+      <div class="trap-cta">
+        <h3>📋 Programme détaillé de la formation</h3>
+        <p>Découvre les 3 spécialisations, le calendrier des portes ouvertes et les modalités d'inscription.</p>
+        <button class="trap-cta__btn" id="btn-trap">Voir le programme complet →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 5 : FINAL with FORENSIC ============ -->
+  <section class="final" id="stage-final">
+    <div class="final__icon" id="final-icon">🔍</div>
+    <h2 id="final-title">Rapport forensique</h2>
+    <p class="final__lead" id="final-lead">Reconstitution chronologique de tout ce que tu as fait sur cette page — sans qu'on te le demande.</p>
+
+    <div class="forensic">
+      <div class="forensic__header">
+        <span><span class="forensic__header__dot"></span>SESSION_LOG</span>
+        <span id="forensic-stamp">—</span>
+      </div>
+      <div id="forensic-body"></div>
+    </div>
+
+    <div class="moral">
+      <h3 id="moral-title">Le phishing fonctionne par <em>fatigue</em>, pas par naïveté.</h3>
+      <p id="moral-text">Chaque clic que tu viens de voir était une décision. Une attaque réussie n'a pas besoin de te tromper une fois — elle a besoin de t'épuiser jusqu'à ce que tu cliques sans réfléchir. La parade n'est pas d'être plus intelligent. C'est de <strong>ralentir à chaque permission demandée</strong>, surtout quand tu es pressé, fatigué, ou flatté par une offre.</p>
+      <div class="signature">— ASTON · CYBERSÉCURITÉ · 2026</div>
+    </div>
+
+    <div class="trap-section">
+      <div class="trap-section__hint">// ok mais cette fois c'est promis</div>
+      <div class="trap-cta trap-cta--final">
+        <h3>📋 Programme de la formation Cybersécurité</h3>
+        <p>Promis, cette fois c'est la vraie page. Pas de piège, juste les infos sur la formation.</p>
+        <button class="trap-cta__btn" id="btn-final-trap">C'est bon, c'est le vrai programme →</button>
+      </div>
+    </div>
+
+    <button class="btn btn--ghost" onclick="location.reload()">↻ Recommencer la démo</button>
+  </section>
+
+</div>
+
+<!-- ============ MIRROR (overlay plein écran) ============ -->
+<div class="mirror" id="stage-mirror">
+  <div class="mirror__rec">
+    <span class="mirror__rec__dot"></span>
+    REC <span id="rec-timer">00:00</span>
+  </div>
+  <video class="mirror__video" id="mirror-video" autoplay muted playsinline></video>
+  <div class="mirror__overlay">
+    <h2>Tu viens de donner accès à ta caméra à un site inconnu.</h2>
+    <p>Tu as lu l'alerte. Tu as vu les risques. Tu as cliqué quand même. <strong>Tu vois le problème ?</strong></p>
+    <div class="mirror__transparency">
+      ✓ Aucun enregistrement — vérifie ton onglet réseau (F12)<br>
+      ✓ Aucun envoi serveur — flux 100% local<br>
+      ✓ Caméra coupée à la seconde où tu cliques STOP
+    </div>
+    <p>Un vrai attaquant aurait <strong>enregistré</strong>, identifié ton visage, croisé avec tes réseaux sociaux, ou utilisé l'image pour du chantage.</p>
+    <button class="btn btn--danger" id="btn-stop">🛑 STOP — Couper la caméra maintenant</button>
+  </div>
+</div>
+
+
+<!-- ============ BOSS : LE GORILLE FINAL ============ -->
+<div class="boss" id="stage-boss">
+  <img class="boss__img" alt="Réaction de quelqu'un qui essaie de comprendre tes choix" src="https://media.giphy.com/media/WRQBXSCnEFJIuxktnw/giphy.gif">
+  <div class="boss__title">On a refait les calculs.</div>
+  <div class="boss__sub">// Troisième piège — troisième clic</div>
+  <div class="boss__txt">
+    Tu viens de <strong>scanner un QR</strong> inconnu, d'<strong>autoriser une caméra</strong> à un site dont tu ignorais tout, et de cliquer sur un <strong>troisième bouton suspect</strong> après deux avertissements explicites.<br><br>
+    Mathématiquement parlant, c'était évitable.
+  </div>
+  <button class="boss__btn" onclick="location.reload()">↻ OK cette fois j'ai vraiment compris</button>
+</div>
+
+
+<script>
+// ============================================================================
+// EVENT LOG — tout est tracé en mémoire, jamais envoyé
+// ============================================================================
+const t0 = performance.now();
+const eventLog = [];
+
+function logEvent(label, data = {}) {
+  eventLog.push({
+    t: (performance.now() - t0) / 1000,
+    label,
+    data
+  });
+}
+logEvent('page_load');
+
+// ============================================================================
+// TRACKING SILENCIEUX (scroll, mouvements, hover, clics)
+// ============================================================================
+let firstInteraction = null;
+let firstScroll = null;
+let peakScrollSpeed = 0;
+let lastScrollY = 0;
+let lastScrollT = performance.now();
+let trapHoverStart = null;
+let trapHoverDuration = 0;
+
+document.addEventListener('scroll', () => {
+  const now = performance.now();
+  if (firstScroll === null) {
+    firstScroll = (now - t0) / 1000;
+    logEvent('first_scroll');
+  }
+  const dy = Math.abs(window.scrollY - lastScrollY);
+  const dt = now - lastScrollT;
+  if (dt > 0 && dt < 200) {
+    const speed = (dy / dt) * 1000;
+    if (speed > peakScrollSpeed) peakScrollSpeed = speed;
+  }
+  lastScrollY = window.scrollY;
+  lastScrollT = now;
+}, { passive: true });
+
+function markFirstInteraction(type) {
+  if (firstInteraction === null) {
+    firstInteraction = (performance.now() - t0) / 1000;
+    logEvent('first_interaction', { type });
+  }
+}
+document.addEventListener('mousemove', () => markFirstInteraction('mouse'), { passive: true });
+document.addEventListener('touchstart', () => markFirstInteraction('touch'), { passive: true });
+document.addEventListener('keydown', () => markFirstInteraction('key'), { passive: true });
+
+// ============================================================================
+// PARSEURS USER-AGENT
+// ============================================================================
+function parseDevice(ua) {
+  if (/iPhone/.test(ua)) {
+    const v = ua.match(/OS (\d+)[._](\d+)/);
+    return v ? `iPhone (iOS ${v[1]}.${v[2]})` : 'iPhone';
+  }
+  if (/iPad/.test(ua)) return 'iPad';
+  if (/Android/.test(ua)) {
+    const v = ua.match(/Android (\d+\.?\d*)/);
+    const m = ua.match(/;\s*([^;)]+?)\s+Build/);
+    const model = m ? m[1].trim() : '';
+    return model ? `${model} (Android ${v ? v[1] : '?'})` : `Android ${v ? v[1] : ''}`;
+  }
+  if (/Mac OS/.test(ua)) return 'Mac';
+  if (/Windows/.test(ua)) return 'Windows PC';
+  if (/Linux/.test(ua)) return 'Linux PC';
+  return 'Inconnu';
+}
+function parseBrowser(ua) {
+  if (/Edg\//.test(ua)) return 'Edge ' + (ua.match(/Edg\/(\d+)/) || [,''])[1];
+  if (/Chrome\//.test(ua)) return 'Chrome ' + (ua.match(/Chrome\/(\d+)/) || [,''])[1];
+  if (/Firefox\//.test(ua)) return 'Firefox ' + (ua.match(/Firefox\/(\d+)/) || [,''])[1];
+  if (/Safari/.test(ua)) return 'Safari';
+  return 'Inconnu';
+}
+function quickHash(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  const hex = (Math.abs(h).toString(16) + '00000000').slice(0, 9).toUpperCase();
+  return `${hex.slice(0,3)}-${hex.slice(3,6)}-${hex.slice(6,9)}`;
+}
+
+// ============================================================================
+// API DATA FETCHERS
+// ============================================================================
+async function fetchIPGeo() {
+  try {
+    const r = await fetch('https://ipwho.is/');
+    const data = await r.json();
+    if (!data.success) throw new Error('lookup failed');
+    return {
+      ip: data.ip,
+      city: data.city || '?',
+      region: data.region || '',
+      country: data.country || '',
+      countryCode: data.country_code || '',
+      isp: (data.connection && data.connection.isp) || 'inconnu'
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+async function getBattery() {
+  if (!navigator.getBattery) return null;
+  try {
+    const bat = await navigator.getBattery();
+    return {
+      level: Math.round(bat.level * 100),
+      charging: bat.charging
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function getHardware() {
+  return {
+    cores: navigator.hardwareConcurrency || null,
+    ram: navigator.deviceMemory || null,
+    network: navigator.connection?.effectiveType || null,
+    downlink: navigator.connection?.downlink || null
+  };
+}
+
+function getSource() {
+  if (!document.referrer) return 'directe (probablement QR scanné)';
+  try {
+    const url = new URL(document.referrer);
+    return url.hostname;
+  } catch {
+    return 'inconnu';
+  }
+}
+
+// ============================================================================
+// AFFICHAGE PROGRESSIF
+// ============================================================================
+function reveal(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('loading');
+  el.textContent = value;
+}
+
+let collectedData = {};
+
+async function populateMetadata() {
+  const ua = navigator.userAgent;
+  const hw = getHardware();
+  const local = {
+    device: parseDevice(ua),
+    browser: parseBrowser(ua),
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    lang: navigator.language,
+    screen: `${screen.width}×${screen.height} @${window.devicePixelRatio || 1}x`,
+    source: getSource(),
+    hwString: hw.cores
+      ? `${hw.cores} cœurs${hw.ram ? ' · ' + hw.ram + ' Go RAM' : ''}`
+      : 'partiellement masqué',
+    networkString: hw.network
+      ? hw.network.toUpperCase() + (hw.downlink ? ` · ~${hw.downlink} Mb/s` : '')
+      : 'masqué'
+  };
+
+  // lance les fetchs async
+  const ipPromise = fetchIPGeo();
+  const batPromise = getBattery();
+
+  // affichage progressif (effet "scan")
+  const seq = [
+    ['m-device',   local.device,        300],
+    ['m-browser',  local.browser,       700],
+    ['m-screen',   local.screen,        1100],
+    ['m-lang',     local.lang,          1400],
+    ['m-tz',       local.tz,            1700],
+    ['m-hardware', local.hwString,      2000],
+    ['m-network',  local.networkString, 2300],
+    ['m-source',   local.source,        2700]
+  ];
+  seq.forEach(([id, val, delay]) => setTimeout(() => reveal(id, val), delay));
+
+  // attente des promesses async
+  const [ipData, battery] = await Promise.all([ipPromise, batPromise]);
+
+  collectedData = { local, ipData, battery, ua };
+
+  setTimeout(() => {
+    if (ipData) {
+      const flag = ipData.countryCode ? countryFlag(ipData.countryCode) : '';
+      reveal('m-geo', `${flag} ${ipData.city}, ${ipData.country} (${ipData.isp})`);
+      logEvent('ip_geo_received', { city: ipData.city, isp: ipData.isp });
+    } else {
+      reveal('m-geo', 'résolution échouée (réseau/bloqueur)');
+    }
+  }, 3100);
+
+  setTimeout(() => {
+    if (battery) {
+      reveal('m-battery', `${battery.level}% ${battery.charging ? '🔌 en charge' : '🔋'}`);
+      logEvent('battery_read', battery);
+    } else {
+      reveal('m-battery', 'API non disponible (Safari/Firefox)');
+    }
+  }, 3500);
+
+  // empreinte finale
+  setTimeout(() => {
+    const fpInput = JSON.stringify(local) + ua + (ipData?.ip || '') + (battery?.level || '');
+    const fp = quickHash(fpInput);
+    document.getElementById('m-fp').textContent = fp;
+    document.getElementById('fp-box').style.display = 'block';
+    collectedData.fingerprint = fp;
+    logEvent('fingerprint_calculated', { hash: fp });
+  }, 4000);
+}
+
+function countryFlag(cc) {
+  if (!cc || cc.length !== 2) return '';
+  return String.fromCodePoint(...cc.toUpperCase().split('').map(c => 0x1F1A5 + c.charCodeAt(0)));
+}
+
+populateMetadata();
+
+// ============================================================================
+// NAVIGATION ENTRE ÉTAPES
+// ============================================================================
+const btnReveal = document.getElementById('btn-reveal');
+btnReveal.addEventListener('click', () => {
+  const elapsed = (performance.now() - t0) / 1000;
+  logEvent('clicked_understood', { reading_time: elapsed });
+  document.getElementById('stage-alert').style.display = 'none';
+  document.getElementById('stage-reveal').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  // setup hover tracking sur le bouton piège
+  setTimeout(() => {
+    const trapBtn = document.getElementById('btn-trap');
+    if (trapBtn) {
+      trapBtn.addEventListener('mouseenter', () => { trapHoverStart = performance.now(); });
+      trapBtn.addEventListener('mouseleave', () => {
+        if (trapHoverStart) {
+          trapHoverDuration += performance.now() - trapHoverStart;
+          trapHoverStart = null;
+        }
+      });
+    }
+  }, 100);
+});
+
+// ============================================================================
+// LE PIÈGE CAMÉRA
+// ============================================================================
+let cameraStream = null;
+let timerInterval = null;
+let cameraGrantedAt = null;
+let cameraRequestedAt = null;
+
+document.getElementById('btn-trap').addEventListener('click', async () => {
+  const trapClickAt = (performance.now() - t0) / 1000;
+  cameraRequestedAt = performance.now();
+  logEvent('clicked_trap', { hover_ms: Math.round(trapHoverDuration) });
+
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user' },
+      audio: false
+    });
+    cameraGrantedAt = performance.now();
+    const decisionMs = cameraGrantedAt - cameraRequestedAt;
+    logEvent('camera_granted', { decision_ms: Math.round(decisionMs) });
+
+    // vibration courte (Android uniquement, ignoré ailleurs)
+    if (navigator.vibrate) navigator.vibrate(200);
+
+    const video = document.getElementById('mirror-video');
+    video.srcObject = cameraStream;
+    document.getElementById('stage-mirror').classList.add('active');
+
+    let elapsed = 0;
+    timerInterval = setInterval(() => {
+      elapsed++;
+      const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('rec-timer').textContent = `${m}:${s}`;
+    }, 1000);
+  } catch (err) {
+    const decisionMs = performance.now() - cameraRequestedAt;
+    logEvent('camera_denied', { decision_ms: Math.round(decisionMs) });
+    showFinal('refused');
+  }
+});
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  const video = document.getElementById('mirror-video');
+  if (video.srcObject) video.srcObject = null;
+  document.getElementById('stage-mirror').classList.remove('active');
+}
+
+document.getElementById('btn-stop').addEventListener('click', () => {
+  const exposureSec = (performance.now() - cameraGrantedAt) / 1000;
+  logEvent('camera_stopped', { exposure_s: exposureSec.toFixed(1) });
+  stopCamera();
+  showFinal('granted');
+});
+
+window.addEventListener('beforeunload', stopCamera);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && cameraStream) stopCamera();
+});
+
+// ============================================================================
+// TROISIÈME PIÈGE — LE GORILLE
+// ============================================================================
+document.getElementById('btn-final-trap').addEventListener('click', () => {
+  logEvent('clicked_third_trap');
+  // double-vibration pour marquer le coup (Android only)
+  if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+  document.getElementById('stage-boss').classList.add('active');
+});
+
+// ============================================================================
+// RAPPORT FORENSIQUE
+// ============================================================================
+function fmtTime(s) {
+  return `[+${s.toFixed(2)}s]`;
+}
+
+function buildForensicEntries(mode) {
+  const entries = [];
+  const get = (label) => eventLog.find(e => e.label === label);
+
+  // page load
+  entries.push({
+    t: 0,
+    icon: '⚡',
+    text: `<strong>Page chargée</strong> — appareil identifié en moins de 50 ms via le seul user-agent.`,
+    note: `aucune permission demandée, ton navigateur a tout livré spontanément`
+  });
+
+  // IP geo
+  const ipEvt = get('ip_geo_received');
+  if (ipEvt) {
+    entries.push({
+      t: ipEvt.t,
+      icon: '🌍',
+      text: `Géolocalisation IP récupérée → <strong>${ipEvt.data.city}</strong> via <strong>${ipEvt.data.isp}</strong>.`,
+      note: `un attaquant adapterait son scénario à ta région (langue, opérateur, fuseau)`
+    });
+  }
+
+  // battery
+  const batEvt = get('battery_read');
+  if (batEvt) {
+    const lvl = batEvt.data.level;
+    let batNote = '';
+    if (lvl < 30) batNote = `niveau bas → un attaquant exploiterait ici une fausse alerte "recharge urgente"`;
+    else batNote = `un attaquant calibrerait son timing sur ton autonomie`;
+    entries.push({
+      t: batEvt.t,
+      icon: '🔋',
+      text: `Niveau batterie lu : <strong>${lvl}%</strong>${batEvt.data.charging ? ' (en charge)' : ''}.`,
+      note: batNote
+    });
+  }
+
+  // fingerprint
+  const fpEvt = get('fingerprint_calculated');
+  if (fpEvt) {
+    entries.push({
+      t: fpEvt.t,
+      icon: '🆔',
+      text: `Empreinte unique générée : <strong>${fpEvt.data.hash}</strong>.`,
+      note: `cette signature te suit sur tous les sites — c'est le fingerprinting`
+    });
+  }
+
+  // first scroll
+  const scrollEvt = get('first_scroll');
+  if (scrollEvt && peakScrollSpeed > 0) {
+    entries.push({
+      t: scrollEvt.t,
+      icon: '👆',
+      text: `Premier scroll détecté (vitesse pic : <strong>${Math.round(peakScrollSpeed)} px/s</strong>).`,
+      note: peakScrollSpeed > 1500
+        ? `tu lis vite — donc tu n'as pas tout lu`
+        : `lecture posée, mais pas suffisamment méfiante`
+    });
+  }
+
+  // clicked understood
+  const understoodEvt = get('clicked_understood');
+  if (understoodEvt) {
+    const sec = understoodEvt.data.reading_time;
+    entries.push({
+      t: understoodEvt.t,
+      icon: '🖱️',
+      text: `Clic sur <strong>"J'ai compris"</strong> — temps de lecture : <strong>${sec.toFixed(1)}s</strong>.`,
+      note: sec < 6
+        ? `temps médian d'une victime de phishing : 6,2s — tu es plus rapide, donc plus vulnérable`
+        : `lecture relativement lente, mais le contenu n'a sans doute pas été retenu`
+    });
+  }
+
+  // clicked trap
+  const trapEvt = get('clicked_trap');
+  if (trapEvt) {
+    const hoverMs = trapEvt.data.hover_ms || 0;
+    let txt = `Clic sur <span class="danger">"Voir le programme"</span> — le piège.`;
+    let note = `tu venais de lire qu'il faut se méfier — tu as cliqué quand même`;
+    if (hoverMs > 100) {
+      txt += ` Survol : ${hoverMs}ms avant le clic.`;
+      if (hoverMs > 1000) note = `tu as hésité (${hoverMs}ms) puis cliqué — un attaquant exploite cette hésitation`;
+    }
+    entries.push({ t: trapEvt.t, icon: '🪤', text: txt, note });
+  }
+
+  // camera result
+  if (mode === 'granted') {
+    const grantEvt = get('camera_granted');
+    if (grantEvt) {
+      const decisionS = grantEvt.data.decision_ms / 1000;
+      entries.push({
+        t: grantEvt.t,
+        icon: '⚠️',
+        text: `<span class="danger">Caméra ACCORDÉE</span> en ${decisionS.toFixed(1)}s.`,
+        note: decisionS < 3
+          ? `pas le temps de réfléchir — tu as cliqué "Autoriser" en réflexe`
+          : `tu as hésité, mais accordé quand même`
+      });
+    }
+    const stopEvt = get('camera_stopped');
+    if (stopEvt) {
+      entries.push({
+        t: stopEvt.t,
+        icon: '🛑',
+        text: `STOP cliqué après <strong>${stopEvt.data.exposure_s}s</strong> d'exposition vidéo.`,
+        note: `dans la vraie vie, l'attaquant aurait déjà ${Math.floor(stopEvt.data.exposure_s * 30)} images de ton visage`
+      });
+    }
+  } else if (mode === 'refused') {
+    const denyEvt = get('camera_denied');
+    if (denyEvt) {
+      const decisionS = denyEvt.data.decision_ms / 1000;
+      entries.push({
+        t: denyEvt.t,
+        icon: '🛡️',
+        text: `<span class="success">Caméra REFUSÉE</span> en ${decisionS.toFixed(1)}s.`,
+        note: `bon réflexe — c'est exactement la barrière qui t'a sauvé`
+      });
+    }
+  }
+
+  return entries.sort((a, b) => a.t - b.t);
+}
+
+function renderForensic(entries) {
+  const body = document.getElementById('forensic-body');
+  body.innerHTML = '';
+  entries.forEach((e, i) => {
+    const div = document.createElement('div');
+    div.className = 'forensic__entry';
+    div.style.animationDelay = (i * 0.4) + 's';
+    div.innerHTML = `
+      <span class="forensic__t">${fmtTime(e.t)}</span>
+      <span class="forensic__icon">${e.icon}</span>
+      <span class="forensic__txt">${e.text}${e.note ? `<em>↳ ${e.note}</em>` : ''}</span>
+    `;
+    body.appendChild(div);
+  });
+
+  // timestamp top-right
+  const stamp = new Date().toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('forensic-stamp').textContent = stamp;
+}
+
+// ============================================================================
+// AFFICHAGE FINAL
+// ============================================================================
+function showFinal(mode) {
+  document.getElementById('stage-reveal').style.display = 'none';
+  const final = document.getElementById('stage-final');
+  final.style.display = 'block';
+
+  if (mode === 'refused') {
+    document.getElementById('final-icon').textContent = '🛡️';
+    document.getElementById('final-title').textContent = 'Bien joué — voici le rapport.';
+    document.getElementById('final-lead').innerHTML =
+      'Tu as <strong style="color:var(--success)">refusé</strong> l\'accès à la caméra. Voici la trace de tout ce qui a été collecté <strong>avant</strong> ce refus.';
+    document.getElementById('moral-title').innerHTML = 'Refuser une permission, ce n\'est pas être <em>parano</em>.';
+    document.getElementById('moral-text').innerHTML =
+      'C\'est appliquer le <strong>principe du moindre privilège</strong> — un fondamental cyber. Tu n\'accordes une permission que si tu sais <strong>pourquoi</strong> elle est demandée et <strong>par qui</strong>. Ici, tu ne savais ni l\'un ni l\'autre. Tu as bien fait. Mais regarde tout ce qui avait déjà été collecté avant.';
+  } else {
+    document.getElementById('final-icon').textContent = '🔍';
+    document.getElementById('final-title').textContent = 'Rapport forensique';
+    document.getElementById('final-lead').innerHTML =
+      'Reconstitution chronologique de tout ce que tu as fait sur cette page — sans qu\'on te le demande explicitement.';
+  }
+
+  const entries = buildForensicEntries(mode);
+  renderForensic(entries);
+
+  window.scrollTo(0, 0);
+}
+</script>
+
+</body>
+</html>
